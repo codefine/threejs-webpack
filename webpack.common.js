@@ -1,6 +1,7 @@
 const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
   mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
@@ -15,7 +16,7 @@ module.exports = {
   module: {
     rules: [
       {
-        enforce: 'pre', // 强制在流水线源头执行
+        enforce: 'pre', // preloader
         test: /\.js$/i,
         exclude: /node_modules/,
         use: {
@@ -35,6 +36,17 @@ module.exports = {
             ]
           }
         }
+      },
+      {
+        test: /\.css$/i,
+        use: [ 'style-loader', 'css-loader' ]
+      },
+      {
+        test: /\.scss$/i,
+        use: ExtractTextPlugin.extract({
+          use: ['css-loader', 'sass-loader'],
+          fallback: 'style-loader' // 在开发环境使用 style-loader
+        })
       }
     ]
   },
@@ -42,6 +54,10 @@ module.exports = {
     new CleanWebpackPlugin(['dist']), // 打包时清空dist
     new HtmlWebpackPlugin({ // 打包时更新html引入文件路径
       'title': 'myapp'
+    }),
+    new ExtractTextPlugin({ // css模块分离
+      filename: "[name].bundle.css",
+      disable: process.env.NODE_ENV === "development"
     })
   ],
   optimization: {
