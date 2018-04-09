@@ -15,6 +15,14 @@ module.exports = {
   module: {
     rules: [
       {
+        enforce: 'pre', // 强制在流水线源头执行
+        test: /\.js$/i,
+        exclude: /node_modules/,
+        use: {
+          loader: 'eslint-loader',
+        }
+      },
+      {
         test: /\.js$/i,
         exclude: /node_modules/,
         use: {
