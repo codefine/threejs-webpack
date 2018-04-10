@@ -56,8 +56,18 @@ module.exports = {
 							name() {
 								return process.env.NODE_ENV === 'development' ? '[path][name].[ext]' : '[hash].[ext]';
 							},
-							// publicPath: 'img/',
 							outputPath: process.env.NODE_ENV === 'development' ? '' : 'sources/'
+						}
+					}
+				]
+			},
+			{
+				test: /\.html$/i,
+				use: [
+					{
+						loader: 'html-loader',
+						options: {
+							minimize: process.env.NODE_ENV !== 'development'
 						}
 					}
 				]
@@ -67,7 +77,7 @@ module.exports = {
 	plugins: [
 		new CleanWebpackPlugin(['dist']), // 打包时清空dist
 		new HtmlWebpackPlugin({ // 打包时更新html引入文件路径
-			'title': 'myapp'
+			template: 'src/index.html'
 		}),
 		new ExtractTextPlugin({ // css模块分离
 			filename: '[name].bundle.css',

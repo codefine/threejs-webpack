@@ -18,9 +18,9 @@ module.exports = WebpackMerge(common, {
 		after(app) {}, /* eslint-disable-line no-unused-vars, no-empty-function */ // 启动后hook
 	},
 	plugins: [
-		new Webpack.DefinePlugin({
-			'process.env.NODE_ENV': JSON.stringify('development')
-		}),
+		// new Webpack.DefinePlugin({
+		// 	'process.env.NODE_ENV': JSON.stringify('development')
+		// }),
 		new Webpack.HotModuleReplacementPlugin() // 热模块替换需要的插件
 	]
 });
