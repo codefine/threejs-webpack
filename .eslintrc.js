@@ -10,6 +10,7 @@ module.exports = {
         "sourceType": "module"
     },
     "rules": {
+        "no-console": [0],
         "indent": ["error", "tab"], // 使用tab缩进
         "linebreak-style": ["error", "unix"], // 使用unix(LF)换行符 
         "quotes": ["error", "single"], // 使用单引号

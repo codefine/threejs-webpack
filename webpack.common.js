@@ -2,6 +2,7 @@ const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const Webpack = require('webpack');
 
 module.exports = {
 	entry: {
@@ -48,7 +49,7 @@ module.exports = {
 				})
 			},
 			{
-				test: /\.(png|svg|jpe*g|gif)$/,
+				test: /\.(png|svg|jpe*g|gif|obj|mtl)$/,
 				use: [
 					{
 						loader: 'file-loader',
@@ -74,6 +75,11 @@ module.exports = {
 			}
 		]
 	},
+	resolve: {
+		alias: {
+			'threejs': path.join(__dirname, '/node_modules/three/examples/js')
+		}
+	},
 	plugins: [
 		new CleanWebpackPlugin(['dist']), // 打包时清空dist
 		new HtmlWebpackPlugin({ // 打包时更新html引入文件路径
@@ -82,6 +88,9 @@ module.exports = {
 		new ExtractTextPlugin({ // css模块分离
 			filename: '[name].bundle.css',
 			disable: process.env.NODE_ENV === 'development'
+		}),
+		new Webpack.ProvidePlugin({ // 自动加载three模块，方便插件的继承
+			THREE: 'three'
 		})
 	],
 	optimization: {

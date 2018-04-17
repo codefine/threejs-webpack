@@ -1,5 +1,5 @@
 {
-  "name": "mapp",
+  "name": "threejs-webpack",
   "version": "1.0.0",
   "description": "basic app env based on webpack",
   "main": "app.js",
@@ -7,11 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
+    "start": "node server.js",
     "testone": "webpack"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codefine/mapp.git"
+    "url": "git@github.com:codefine/threejs-webpack.git"
   },
   "keywords": [
     "webpack"
@@ -19,9 +20,9 @@
   "author": "Michael.Lu",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/codefine/mapp/issues"
+    "url": "https://github.com/codefine/threejs-webpack/issues"
   },
-  "homepage": "https://github.com/codefine/mapp#readme",
+  "homepage": "https://github.com/codefine/threejs-webpack#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.2",
@@ -33,6 +34,7 @@
     "css-loader": "^0.28.11",
     "eslint": "^4.19.1",
     "eslint-loader": "^2.0.0",
+    "exports-loader": "^0.7.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
@@ -49,6 +51,10 @@
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
-    "cross-env": "^5.1.4"
+    "cross-env": "^5.1.4",
+    "koa": "^2.5.0",
+    "koa-static": "^4.0.2",
+    "three": "^0.91.0",
+    "tween.js": "^16.6.0"
   }
 }

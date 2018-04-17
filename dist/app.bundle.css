@@ -1,5 +1,10 @@
-.hello {
-  width: 100px;
-  height: 100px;
-  background: url(sources/365e253b1b8e8265ed6a101c40889777.jpg) no-repeat;
-  background-size: 100% 100%; }
+body {
+  margin: 0;
+  padding: 0; }
+
+#webgl {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0; }
