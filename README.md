@@ -1,5 +1,5 @@
 # threejs-webpack
-basic threejs app env based on webpack
+basic threejs `R91` app env based on webpack
 
 # Getting Start
 ``` bash
