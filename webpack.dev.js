@@ -4,21 +4,21 @@ const Webpack = require('webpack');
 
 module.exports = WebpackMerge(common, {
 	mode: 'development',
-	devtool: 'inline-source-map', // source-map 用于debug
-	devServer: { // 本地测试服务器
+	devtool: 'inline-source-map',
+	devServer: {
 		open: true,
 		https: false,
 		contentBase: './dist',
-		hot: true, // 热模块替换
-		host: '0.0.0.0', // 局域网访问支持
+		hot: true,
+		host: '0.0.0.0', // local area network enabled
 		port: 9527,
-		useLocalIp: true, // 以本地ip打开
-		compress: true, // gzip压缩
+		useLocalIp: true,
+		compress: true,
 		headers: {},
-		before(app) {}, /* eslint-disable-line no-unused-vars, no-empty-function */  // 启动前hook
-		after(app) {}, /* eslint-disable-line no-unused-vars, no-empty-function */ // 启动后hook
+		before(app) {}, /* eslint-disable-line */
+		after(app) {}, /* eslint-disable-line */
 	},
 	plugins: [
-		new Webpack.HotModuleReplacementPlugin() // 热模块替换需要的插件
+		new Webpack.HotModuleReplacementPlugin()
 	]
 });

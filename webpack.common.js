@@ -31,8 +31,8 @@ module.exports = {
 					options: {
 						presets: ['env'],
 						plugins: [
-							'syntax-dynamic-import', // import()语法支持
-							'transform-runtime' // async语法支持
+							'syntax-dynamic-import', // import() support
+							'transform-runtime' // async support
 						]
 					}
 				}
@@ -45,11 +45,11 @@ module.exports = {
 				test: /\.scss$/i,
 				use: ExtractTextPlugin.extract({
 					use: ['css-loader', 'sass-loader'],
-					fallback: 'style-loader' // 在开发环境使用 style-loader
+					fallback: 'style-loader'
 				})
 			},
 			{
-				test: /\.(png|svg|jpe*g|gif|obj|mtl)$/,
+				test: /\.(png|svg|jpe*g|gif|obj|mtl)$/, // obj | mtl raw files etc...
 				use: [
 					{
 						loader: 'file-loader',
@@ -81,15 +81,15 @@ module.exports = {
 		}
 	},
 	plugins: [
-		new CleanWebpackPlugin(['dist']), // 打包时清空dist
-		new HtmlWebpackPlugin({ // 打包时更新html引入文件路径
+		new CleanWebpackPlugin(['dist']), // clean dist
+		new HtmlWebpackPlugin({
 			template: 'src/index.html'
 		}),
-		new ExtractTextPlugin({ // css模块分离
+		new ExtractTextPlugin({
 			filename: '[name].bundle.css',
 			disable: process.env.NODE_ENV === 'development'
 		}),
-		new Webpack.ProvidePlugin({ // 自动加载three模块，方便插件的继承
+		new Webpack.ProvidePlugin({ // preload three prototype
 			THREE: 'three'
 		})
 	],
