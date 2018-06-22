@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>myapp</title>
+  <title>Music Show</title>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -11,12 +11,17 @@
   <meta content="yes" name="apple-mobile-web-app-capable">
   <meta content="black" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <!-- <meta itemprop="name" content="share title" /> -->
-  <!-- <meta itemprop="image" content="share image" /> -->
-  <!-- <meta name="description" itemprop="description" content="share description" /> -->
 </head>
 
 <body>
+  <div id="loading">
+    <img src="./assets/logo.jpg" alt="">
+    <p>Loading <span>0</span>%</p>
+  </div>
+  <div id="info">
+    <p>Music Show</p>
+    <p>Created by <a href="https://www.lujingtao.com" target="_blank">Michael.Lu</a>, 2018-06-14</p>
+  </div>
   <canvas id="webgl"></canvas>
 </body>
 
