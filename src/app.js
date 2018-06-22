@@ -1,7 +1,7 @@
-import './assets/style.scss';
-// import Vconsole from 'vconsole';
-import Engine from './assets/webgl.js';
+import './assets/style/main.scss';
+import Vconsole from 'vconsole'; /* eslint-disable-line */
+// import Engine from './assets/webgl.js';
 
-// const vconsole = new Vconsole(); /* eslint-disable-line */
+// const vconsole = new Vconsole(); // 启用vconsole调试工具
 
-const engine = new Engine(); /* eslint-disable-line */
+// const engine = new Engine(); /* eslint-disable-line */

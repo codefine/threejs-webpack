@@ -13,6 +13,5 @@ npm run dev
 
 # CLI
 ``` bash
-npm run build
 npm start
 ```
