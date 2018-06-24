@@ -1,4 +1,8 @@
-import './index.html';
+// 开发环境html热更新
+if (process.env.NODE_ENV === 'development') {
+	require('./index.html');
+}
+
 import './assets/style/main.scss';
 import Info from 'plugin/info/info.js'; /* eslint-disable-line */
 import Loading from 'plugin/loading/loading.js'; /* eslint-disable-line */
@@ -18,8 +22,25 @@ import Vconsole from 'vconsole'; /* eslint-disable-line */
 // 	time: new Date().toLocaleDateString() 
 // });
 
-const loading = new Loading();
-loading.add([0, 100000]);
+const loading = new Loading({
+	onLoad() {
+		console.log('finish');
+	}
+});
+let n = 0;
+let m = 0;
+setInterval(() => {
+	loading.update({
+		id: 'test',
+		process: [n++, 300]
+	});
+}, 13);
+setInterval(() => {
+	loading.update({
+		id: 'test1',
+		process: [m++, 300]
+	});
+}, 13);
 
 
 // const engine = new Engine(); /* eslint-disable-line */

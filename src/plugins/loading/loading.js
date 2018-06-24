@@ -3,14 +3,13 @@ import logoBase64 from './default_logo_base64';
 
 class Loading {
 	constructor(opts = {}) {
+		const { logo = logoBase64, onLoad } = opts;
 		this.queue = [];
-		this.now = 0;
-		this.total = Infinity;
-		const { logo = logoBase64 } = opts;
-		const container = this.createContainer();
-		this.createLogo(logo, container);
-		this.process = this.createProcessBar(container);
-		this.appendLoading(container);
+		this.onLoad = onLoad;
+		this.container = this.createContainer();
+		this.createLogo(logo, this.container);
+		this.processBar = this.createProcessBar(this.container);
+		this.appendLoading(this.container);
 	}
 	createDom(attrs = {}, classList, tagName = 'div') {
 		const element = document.createElement(tagName);
@@ -31,10 +30,12 @@ class Loading {
 			innerHTML: `<img src="${logo}">`
 		}, ['loading-top']);
 		container.appendChild(topLogo);
+		this.topLogo = topLogo;
 		const bottomLogo = this.createDom({
 			innerHTML: `<img src="${logo}">`
 		}, ['loading-bottom']);
 		container.appendChild(bottomLogo);
+		this.bottomLogo = bottomLogo;
 	}
 	createProcessBar(container) {
 		const bar = this.createDom({}, ['loading-process']);
@@ -44,19 +45,43 @@ class Loading {
 	appendLoading(container) {
 		document.body.insertBefore(container, [...document.body.childNodes][0]);
 	}
-	add(now = 0, total = 0) {
-		this.queue.push([now, total]);
+	subscribe(watcher) {
+		this.queue.push(watcher);
 	}
-	update() {
-		this.now = this.queue.reduce((prev, next) => {
-			return prev[0] + next[0];
-		}, 0);
-		this.total = this.queue.reduce((prev, next) => {
-			return prev[1] + next[1];
-		}, 0);
-		if (this.now === this.total) {
-			this.onload && this.onload();
+	update(watcher) {
+		const { id, process: [ now ] } = watcher;
+		const index = this.queue.findIndex(item => item.id === id);
+		if (index >= 0) {
+			this.queue[index].process[0] = now;
+			this.onProcess();
+		} else {
+			this.subscribe(watcher);
 		}
+	}
+	onProcess() {
+		const now = this.queue.length > 1 ? this.queue.reduce((prev, next) => {
+			return prev.process[0] + next.process[0];
+		}) : this.queue[0].process[0];
+		const total = this.queue.length > 1 ? this.queue.reduce((prev, next) => {
+			return prev.process[1] + next.process[1];
+		}) : this.queue[0].process[1];
+		this.updateProcessBar(now, total);
+		if (now === total) {
+			this.logoFinishAction();
+			this.onLoad && this.onLoad();
+			this.onLoad = null;
+			this.onProcess = () => {}; // eslint-disable-line
+		}
+	}
+	updateProcessBar(now, total) {
+		now < 0 && (now = 0);
+		this.processBar.style.width = Math.ceil(now / total * 100) + '%';
+	}
+	logoFinishAction() {
+		this.container.classList.add('finish');
+		setTimeout(() => {
+			document.body.removeChild(this.container);
+		}, 2500);
 	}
 }
 
