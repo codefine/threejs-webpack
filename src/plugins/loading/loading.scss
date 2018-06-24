@@ -1,0 +1,48 @@
+#loading{
+  $IMG_HEIGHT: 40vh;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1001;
+  background: #000;
+  >.loading-top,
+  >.loading-bottom{
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    z-index: 1;
+    >img{
+      height: $IMG_HEIGHT;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+  >.loading-top{
+    top: 0;
+    >img{
+      bottom: -$IMG_HEIGHT / 2;
+    }
+  }
+  >.loading-bottom{
+    bottom: 0;
+    >img{
+      top: -$IMG_HEIGHT / 2;
+    }
+  }
+  >.loading-process{
+    width: 0%;
+    height: 0;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    box-shadow: 0 0 6px 1px rgba(#fff, 1);
+  }
+}

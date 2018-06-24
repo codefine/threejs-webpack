@@ -77,7 +77,8 @@ module.exports = {
 	},
 	resolve: {
 		alias: {
-			'threejs': path.resolve(__dirname, '../node_modules/three/examples/js')
+			'threejs': path.resolve(__dirname, '../node_modules/three/examples/js'),
+			'plugin': path.resolve(__dirname, '../src/plugins')
 		}
 	},
 	plugins: [

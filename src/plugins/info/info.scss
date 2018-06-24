@@ -1,0 +1,26 @@
+#info{
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  >.info-title{
+    line-height: 30px;
+    text-align: center;
+    color: inherit;
+  }
+  >.info-describtion{
+    line-height: 30px;
+    text-align: center;
+  }
+  >.info-content{
+    line-height: 30px;
+    text-align: center;
+  }
+  &.light{
+    color: #fff;
+  }
+  &.dark{
+    color: #000;
+  }
+}
