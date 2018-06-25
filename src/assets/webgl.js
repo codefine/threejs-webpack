@@ -1,30 +1,64 @@
+// 资源
+import image_part1 from './image/part1.png'; /* eslint-disable-line */
+import image_part2 from './image/part2.png'; /* eslint-disable-line */
+import image_particle from './image/particle.png'; /* eslint-disable-line */
+import image_logo from './image/logo.png'; /* eslint-disable-line */
+import audio_env1 from './audio/env_loop/env_1_loop.mp3'; /* eslint-disable-line */
+import audio_env2 from './audio/env_loop/env_2_loop.mp3'; /* eslint-disable-line */
+import audio_env3 from './audio/env_loop/env_3_loop.mp3'; /* eslint-disable-line */
+import audio_note1 from './audio/note/note01.mp3'; /* eslint-disable-line */
+import audio_note2 from './audio/note/note02.mp3'; /* eslint-disable-line */
+import audio_note3 from './audio/note/note03.mp3'; /* eslint-disable-line */
+import audio_note4 from './audio/note/note04.mp3'; /* eslint-disable-line */
+import audio_note5 from './audio/note/note05.mp3'; /* eslint-disable-line */
+import audio_note6 from './audio/note/note06.mp3'; /* eslint-disable-line */
+import audio_note7 from './audio/note/note07.mp3'; /* eslint-disable-line */
+import audio_note8 from './audio/note/note08.mp3'; /* eslint-disable-line */
+import audio_note9 from './audio/note/note09.mp3'; /* eslint-disable-line */
+import audio_note10 from './audio/note/note10.mp3'; /* eslint-disable-line */
+import audio_note11 from './audio/note/note11.mp3'; /* eslint-disable-line */
+import audio_note12 from './audio/note/note12.mp3'; /* eslint-disable-line */
+const IMAGE_GROUP = { image_part1, image_part2, image_particle, image_logo };
+const AUDIO_GROUP = {
+	env: { audio_env1, audio_env2, audio_env3 },
+	note: { audio_note1, audio_note2, audio_note3, audio_note4, audio_note5, audio_note6, audio_note7, audio_note8, audio_note9, audio_note10, audio_note11, audio_note12 }
+};
+
+// 工具
 import * as THREE from 'three';
-import 'threejs/controls/OrbitControls';
-import music from './music.mp3';
-import logo from './logo.jpg';
 
 class MyWebGL {
-	constructor() {
+	constructor(loadingUI) {
+		this.loadingUI = loadingUI;
+		this.sources = {
+			texture: {},
+			audio: {
+				env: {},
+				note: {}
+			}
+		};
+		this.mouse = new THREE.Vector2();
 		this.init();
 		this.resize();
-		this.useControls();
 		this.animate();
-		this.initAudio();
-		this.initCubes();
-		this.initLogo();
+		this.initManager();
+		this.loadTexture();
+		this.loadAudio();
+		this.mouseControls();
 	}
 
 	init() {
 		const scene = new THREE.Scene();
-		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-		camera.position.set(1500, 2000, 1500);
+		scene.fog = new THREE.FogExp2( 0x000000, 0.008 );
 
-		const light = new THREE.SpotLight(0xffffff, 1.2);
-		light.distance = 2000;
-		light.penumbra = 0.5;
-		light.decay = 1;
-		light.position.set(0, 800, 0);
+		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+		camera.position.set(0, 0, 100);
+		
+		const light = new THREE.PointLight( 0xffffff, 1, 100 );
+		light.position.set(0, 0, 60);
 		scene.add(light);
+
+		scene.add(new THREE.AmbientLight( 0xb1b1b1 ));
 
 		const container = document.querySelector('#webgl');
 		const renderer = new THREE.WebGLRenderer({
@@ -34,35 +68,184 @@ class MyWebGL {
 		});
     
 		renderer.setSize(window.innerWidth, window.innerHeight);
-		renderer.setClearColor(new THREE.Color(0x1a2c3a), 1);
+		renderer.setClearColor(new THREE.Color(0x000000), 1);
 		renderer.setPixelRatio(window.devicePixelRatio);
 		this.scene = scene;
 		this.camera = camera;
-		this.light = light;
+		// this.light = light;
 		this.container = container;
 		this.renderer = renderer;	
+	}
+
+	initManager() {
+		const manager = new THREE.LoadingManager();
+		manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+			console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+			this.loadingUI.update({
+				id: 'all',
+				process: [itemsLoaded, itemsTotal]
+			});
+		};
+		manager.onLoad = () => {
+			// console.log(this.sources);
+			this.createPlants();
+			this.createParticles(60);
+			this.createLogo();
+		};
+		this.manager = manager;
+	}
+
+	loadTexture() {
+		const textureLoader = new THREE.TextureLoader(this.manager);
+		for (const image of Object.keys(IMAGE_GROUP)) {
+			textureLoader.load(IMAGE_GROUP[image], texture => this.sources.texture[image] = texture);
+		}
+	}
+
+	loadAudio() {
+		const listener = new THREE.AudioListener();
+		this.camera.add( listener );
+		this.listener = listener;
+		const audioLoader = new THREE.AudioLoader(this.manager);
+		for (const audio of Object.keys(AUDIO_GROUP.env)) {
+			audioLoader.load(AUDIO_GROUP.env[audio], buffer => {
+				const sound = new THREE.PositionalAudio(listener);
+				sound.setBuffer(buffer);
+				sound.setRefDistance(20);
+				// sound.play();
+				this.sources.audio.env[audio] = sound;
+			});
+		}
+		for (const audio of Object.keys(AUDIO_GROUP.note)) {
+			audioLoader.load(AUDIO_GROUP.note[audio], buffer => {
+				const sound = new THREE.Audio(listener);
+				sound.setBuffer( buffer );
+				sound.setLoop(true);
+				sound.setVolume(0.5);
+				// sound.play();
+				this.sources.audio.note[audio] = sound;
+			});
+		}
+	}
+
+	createLogo() {
+		const geo = new THREE.PlaneBufferGeometry(50, 50);
+		const mtl = new THREE.MeshPhongMaterial({
+			transparent: true,
+			map: this.sources.texture.image_logo
+		});
+		const logo = new THREE.Mesh(geo, mtl);
+		logo.position.set(0, 0, 50);
+		this.scene.add(logo);
+	}
+
+	createPlants() {
+		this.plantGroup = new THREE.Object3D();
+		this.scene.add(this.plantGroup);
+		
+		_plane.call(this, 50, 30, -30);
+		_plane.call(this, -30, -10, 0);
+		_plane.call(this, -80, 50, -20);
+		_plane.call(this, -70, 0, 40);
+		_plane.call(this, -10, 50, 30);
+		_plane.call(this, 80, -30, 30);
+		_plane.call(this, 80, 60, 10);
+		_plane.call(this, 20, -40, -40);
+		_plane.call(this, 90, 20, 30);
+
+		_plane.call(this, -60, 30, 80);
+		_plane.call(this, 50, 20, 60);
+		_plane.call(this, -10, -40, 70);
+		_plane.call(this, -80, -30, 60);
+		_plane.call(this, 70, -50, 80);
+
+		function _plane(x, y, z) {
+			const geo = new THREE.PlaneBufferGeometry(100, 100);
+			const mtl = new THREE.MeshPhongMaterial({
+				transparent: true,
+				map: this.sources.texture.image_part1
+			});
+			const plane = new THREE.Mesh(geo, mtl);
+			plane.position.set(x, y, z);
+			plane.userData.direction = [-1, 1][Math.round( Math.random() )];
+			this.plantGroup.add(plane);
+		}
+	}
+
+	createParticles(len) {
+		this.particleGroup = new THREE.Object3D();
+		this.scene.add(this.particleGroup);
+		for (let i = 0; i < len; i++) {
+			this.particleGroup.add( _particle(this.sources.texture.image_particle) );
+		}
+		function _particle(texture) {
+			const geo = new THREE.PlaneBufferGeometry(8, 8);
+			const mtl = new THREE.MeshBasicMaterial({
+				transparent: true,
+				map: texture
+			});
+			const particle = new THREE.Mesh(geo, mtl);
+			particle.position.set(-120 + Math.random() * 240, -80 + Math.random() * 160, -100 + Math.random() * 200);
+			particle.userData.direction = [-1, 1][Math.round( Math.random() )];
+			particle.userData.middle = particle.position.y;
+			return particle;
+		}
 	}
   
 	animate() {
 		window.requestAnimationFrame(() => {
 			this.animate();
 		});
-		this.controls.enabled && this.controls.update();
-		if (this.analyser) { // music start
-			const data = this.analyser.getFrequencyData();
-			this.light.angle = data[3] / 120;
-			for (let i = 0; i < data.length; i ++) {
-				const cube = this.cubeBox.getObjectByName(`cube${i}`);
-				if (cube) {
-					cube && cube.scale.set(1, Math.max(data[i] / 255 * 4, 0.05), 1);
-				}
+		this.plantsAnimation();
+		this.particlesAnimation();
+		this.updateCamera();
+		this.render();
+	}
+
+	plantsAnimation() {
+		if (this.plantGroup && this.plantGroup.children.length) {
+			for (const plant of this.plantGroup.children) {
+				plant.rotation.z += plant.userData.direction * 0.001;
 			}
 		}
-		if (this.logo) {
-			this.logo.rotation.x += 0.01;
-			this.logo.rotation.z -= 0.01;
+	}
+
+	particlesAnimation() {
+		if (this.particleGroup && this.particleGroup.children.length) {
+			for (const particle of this.particleGroup.children) {
+				let { middle, direction } = particle.userData;
+				particle.position.y = middle + Math.cos( Date.now() * 0.00005 ) * 40 * direction;
+			}
 		}
-		this.render();
+	}
+
+	handleMouseMove(event) {
+		event.preventDefault();
+		const center = {
+			x: window.innerWidth / 2,
+			y: window.innerHeight / 2
+		};
+		let x = event.clientX ? event.clientX : (event.changedTouches ? event.changedTouches[0].clientX : center.x);
+		let y = event.clientX ? event.clientY : (event.changedTouches ? event.changedTouches[0].clientY : center.y);
+		this.mouse.x = -1 + (x / window.innerWidth) * 2;
+		this.mouse.y = 1 - (y / window.innerHeight) * 2;
+		// raycaster.setFromCamera(this.mouse, camera);
+	}
+
+	updateCamera() {
+		this.camera.position.x += ( this.normalize(this.mouse.x, -1, 1, -60, 50) - this.camera.position.x ) * 0.1;
+		this.camera.position.z += ( this.normalize(-this.mouse.y, -1, 1, 30, 150) - this.camera.position.z ) * 0.1;
+		this.camera.lookAt(new THREE.Vector3(0, 0, -10000));
+	}
+
+	mouseControls() {
+		this.renderer.domElement.addEventListener('mousemove', (ev) => {
+			this.handleMouseMove(ev);
+		}, false);
+		this.renderer.domElement.addEventListener('touchmove', (ev) => {
+			ev.preventDefault();
+			this.handleMouseMove(ev);
+		}, false);
 	}
 	
 	resize() {
@@ -75,137 +258,6 @@ class MyWebGL {
   
 	render() {
 		this.renderer.render(this.scene, this.camera);
-	}
-	
-	useControls() {
-		const controls = new THREE.OrbitControls(this.camera, this.container);
-		controls.timer = null;
-		controls.rotateSpeed = 0.2;
-		controls.enableDamping = true;
-		controls.dampingFactor = 0.3;
-		controls.maxDistance = 4000;
-		controls.panningMode = THREE.ScreenSpacePanning;
-		controls.panSpeed = 0.5;
-		controls.autoRotate = true;
-		controls.autoRotateSpeed = 0.4;
-		controls.addEventListener('end', () => {
-			controls.autoRotate = false;
-		}, false);
-		controls.addEventListener('end', () => {
-			clearTimeout(controls.timer);
-			controls.timer = setTimeout(() => {
-				controls.autoRotate = true;
-			}, 1000);
-		}, false);
-		this.controls = controls;
-	}
-
-	initAudio() {
-		const listener = new THREE.AudioListener();
-		this.scene.add( listener );
-		const audio = new THREE.Audio( listener );
-		this.scene.add( audio );
-		const fftSize = 512;
-		this.fftSize = fftSize;
-		const analyser = new THREE.AudioAnalyser( audio, fftSize );
-		this.analyser = analyser;
-		const audioLoader = new THREE.AudioLoader();
-		audioLoader.load(music, (buffer) => {
-			audio.setBuffer( buffer );
-			audio.setLoop( true );
-			audio.setVolume( 0.5 );
-			audio.play();
-		},  (xhr) => {
-			const total = 5874479;
-			const process = Math.ceil(xhr.loaded / total * 100);
-			const dom = document.querySelector('#loading>p>span');
-			dom.innerHTML = process;
-			if (process === 100) {
-				document.querySelector('#loading').classList.add('hide');
-			}
-		});
-	}
-
-	initCubes() {
-		const n = this.fftSize / 2;
-		const sqrt = Math.sqrt(n);
-
-		const cubeBox = new THREE.Object3D();
-		cubeBox.name = 'box';
-		this.cubeBox = cubeBox;
-		this.scene.add(cubeBox);
-
-		let matrix = Array.from(new Array(sqrt - 1), () => [ 0, 0 ]);
-		setMatrix(matrix, 0, 0, 0, sqrt - 1);
-
-		matrix.forEach((row, y) => {
-			y *= 100;
-			row.forEach((col, x) => {
-				x *= 100;
-				const cube = createNote(col);
-				cube.name = 'cube' + col;
-				cube.position.set(
-					x,
-					0,
-					y
-				);
-				cubeBox.add(cube);
-			});
-		});
-
-		const { center } = this.computedBounding(cubeBox);
-		cubeBox.position.set(-center.x, -center.y, -center.z);
-
-		function createNote(i) {
-			const cubeGeo = new THREE.CylinderGeometry(40, 40, 255);
-			const cubeMtl = new THREE.MeshPhongMaterial({
-				color: new THREE.Color(`rgb(${255 - i}, ${20 + i}, ${10 + i})`),
-				transparent: true,
-				opacity: 1,
-				specular: 0x404078,
-				shininess: 20
-			});
-			return new THREE.Mesh(cubeGeo, cubeMtl);
-		}
-
-		function setMatrix(matrix, x, y, start, n) {
-			let i, j;
-			if (n <= 0) {
-				return;
-			}
-			if (n == 1) {
-				matrix[x][y] = start;
-				return;
-			}
-			for (i = x; i < x + n-1; i++) { // 上部
-				matrix[y][i] = start++;
-			}
-			for (j = y; j < y + n-1; j++) { //右边
-				matrix[j][x+n-1] = start++;
-			}
-			for (i = x+n-1; i > x; i--) { // 底部
-				matrix[y+n-1][i] = start++;
-			}
-			for (j = y+n-1; j > y; j--) { // 左边
-				matrix[j][x] = start++;
-			}
-			setMatrix(matrix, x+1, y+1, start, n-2); // 递归
-		}
-	}
-
-	initLogo() {
-		const cubeGeo = new THREE.CubeGeometry(400, 400, 400);
-		const materials = Array.from(new Array(6), () => {
-			return new THREE.MeshPhongMaterial({
-				normalMap: new THREE.TextureLoader().load(logo),
-				specular: 0x404078,
-				shininess: 60
-			});
-		});
-		const cube = new THREE.Mesh(cubeGeo, materials);
-		cube.position.y = 400;
-		this.logo = cube;
-		this.scene.add(cube);
 	}
 
 	computedBounding(obj) {
@@ -222,6 +274,15 @@ class MyWebGL {
 		const sideX = Math.max( Math.abs(box.max.x), Math.abs(box.min.x) );
 		const sideZ = Math.max( Math.abs(box.max.z), Math.abs(box.min.z) );
 		return { scale, center, bottom, top, maxLength, maxWidth, maxHeight, sideX, sideZ, radius };
+	}
+
+	normalize(v, vmin, vmax, tmin, tmax) {
+		const nv = Math.max(Math.min(v, vmax), vmin); //鼠标移出画布后坐标修正
+		const dv = vmax - vmin; //坐标轴总长度
+		const pc = (nv - vmin) / dv; //坐标百分化
+		const dt = tmax - tmin; //取值范围
+		const tv = tmin + (pc * dt); //范围内的实际坐标
+		return tv;
 	}
 
 	/**

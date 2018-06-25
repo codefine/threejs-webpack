@@ -80,8 +80,9 @@ class Loading {
 	logoFinishAction() {
 		this.container.classList.add('finish');
 		setTimeout(() => {
+			this.container.classList.add('hide');
 			document.body.removeChild(this.container);
-		}, 2500);
+		}, 2450);
 	}
 }
 
