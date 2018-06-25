@@ -24,4 +24,4 @@ import Engine from './assets/webgl.js';
 
 const loading = new Loading();
 
-const engine = new Engine(loading); /* eslint-disable-line */
+new Engine(loading); /* eslint-disable-line */

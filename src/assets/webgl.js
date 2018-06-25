@@ -43,7 +43,7 @@ class MyWebGL {
 		this.animate();
 		this.initManager();
 		this.loadTexture();
-		this.loadAudio();
+		// this.loadAudio();
 		this.mouseControls();
 	}
 
@@ -142,48 +142,49 @@ class MyWebGL {
 	createPlants() {
 		this.plantGroup = new THREE.Object3D();
 		this.scene.add(this.plantGroup);
+
+		const geo = new THREE.PlaneGeometry(100, 100);
+		const mtl = new THREE.MeshPhongMaterial({
+			transparent: true,
+			map: this.sources.texture.image_part1
+		});
 		
-		_plane.call(this, 50, 30, -30);
-		_plane.call(this, -30, -10, 0);
-		_plane.call(this, -80, 50, -20);
-		_plane.call(this, -70, 0, 40);
-		_plane.call(this, -10, 50, 30);
-		_plane.call(this, 80, -30, 30);
-		_plane.call(this, 80, 60, 10);
-		_plane.call(this, 20, -40, -40);
-		_plane.call(this, 90, 20, 30);
+		_plant.call(this, geo, mtl, 50, 30, -30);
+		_plant.call(this, geo, mtl, -30, -10, 0);
+		_plant.call(this, geo, mtl, -80, 50, -20);
+		_plant.call(this, geo, mtl, -70, 0, 40);
+		_plant.call(this, geo, mtl, -10, 50, 30);
+		_plant.call(this, geo, mtl, 80, -30, 30);
+		_plant.call(this, geo, mtl, 80, 60, 10);
+		_plant.call(this, geo, mtl, 20, -40, -40);
+		_plant.call(this, geo, mtl, 100, 40, 35);
 
-		_plane.call(this, -60, 30, 80);
-		_plane.call(this, 50, 20, 60);
-		_plane.call(this, -10, -40, 70);
-		_plane.call(this, -80, -30, 60);
-		_plane.call(this, 70, -50, 80);
+		_plant.call(this, geo, mtl, -60, 30, 80);
+		_plant.call(this, geo, mtl, 50, 20, 60);
+		_plant.call(this, geo, mtl, -10, -40, 70);
+		_plant.call(this, geo, mtl, -80, -30, 60);
+		_plant.call(this, geo, mtl, 70, -50, 80);
 
-		function _plane(x, y, z) {
-			const geo = new THREE.PlaneBufferGeometry(100, 100);
-			const mtl = new THREE.MeshPhongMaterial({
-				transparent: true,
-				map: this.sources.texture.image_part1
-			});
-			const plane = new THREE.Mesh(geo, mtl);
-			plane.position.set(x, y, z);
-			plane.userData.direction = [-1, 1][Math.round( Math.random() )];
-			this.plantGroup.add(plane);
+		function _plant(geo, mtl, x, y, z) {
+			const plant = new THREE.Mesh(geo, mtl);
+			plant.position.set(x, y, z);
+			plant.userData.direction = [-1, 1][Math.round( Math.random() )];
+			this.plantGroup.add(plant);
 		}
 	}
 
 	createParticles(len) {
 		this.particleGroup = new THREE.Object3D();
 		this.scene.add(this.particleGroup);
+		const geo = new THREE.PlaneBufferGeometry(8, 8);
+		const mtl = new THREE.MeshBasicMaterial({
+			transparent: true,
+			map: this.sources.texture.image_particle
+		});
 		for (let i = 0; i < len; i++) {
-			this.particleGroup.add( _particle(this.sources.texture.image_particle) );
+			this.particleGroup.add( _particle(geo, mtl) );
 		}
-		function _particle(texture) {
-			const geo = new THREE.PlaneBufferGeometry(8, 8);
-			const mtl = new THREE.MeshBasicMaterial({
-				transparent: true,
-				map: texture
-			});
+		function _particle(geo, mtl) {
 			const particle = new THREE.Mesh(geo, mtl);
 			particle.position.set(-120 + Math.random() * 240, -80 + Math.random() * 160, -100 + Math.random() * 200);
 			particle.userData.direction = [-1, 1][Math.round( Math.random() )];
