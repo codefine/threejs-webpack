@@ -132,11 +132,13 @@ class MyWebGL {
 		const geo = new THREE.PlaneBufferGeometry(50, 50);
 		const mtl = new THREE.MeshPhongMaterial({
 			transparent: true,
+			opacity: 0,
 			map: this.sources.texture.image_logo
 		});
 		const logo = new THREE.Mesh(geo, mtl);
 		logo.position.set(0, 0, 50);
 		this.scene.add(logo);
+		this.logo = logo;
 	}
 
 	createPlants() {
@@ -197,16 +199,23 @@ class MyWebGL {
 		window.requestAnimationFrame(() => {
 			this.animate();
 		});
+		this.logoAnimation();
 		this.plantsAnimation();
 		this.particlesAnimation();
 		this.updateCamera();
 		this.render();
 	}
 
+	logoAnimation() {
+		if (this.logo) {
+			this.logo.material.opacity += (1 - this.logo.material.opacity) * 0.01;
+		}
+	}
+
 	plantsAnimation() {
 		if (this.plantGroup && this.plantGroup.children.length) {
 			for (const plant of this.plantGroup.children) {
-				plant.rotation.z += plant.userData.direction * 0.001;
+				plant.rotation.z += plant.userData.direction * 0.0005;
 			}
 		}
 	}
@@ -234,7 +243,7 @@ class MyWebGL {
 	}
 
 	updateCamera() {
-		this.camera.position.x += ( this.normalize(this.mouse.x, -1, 1, -60, 50) - this.camera.position.x ) * 0.1;
+		this.camera.position.x += ( this.normalize(this.mouse.x, -1, 1, -60, 60) - this.camera.position.x ) * 0.1;
 		this.camera.position.z += ( this.normalize(-this.mouse.y, -1, 1, 30, 150) - this.camera.position.z ) * 0.1;
 		this.camera.lookAt(new THREE.Vector3(0, 0, -10000));
 	}
