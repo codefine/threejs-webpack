@@ -10,7 +10,7 @@ import Vconsole from 'vconsole'; /* eslint-disable-line */
 import Engine from './assets/webgl.js';
 
 // 启用vconsole调试工具
-// const vconsole = new Vconsole();
+// new Vconsole();
 
 // 说明
 // new Info({

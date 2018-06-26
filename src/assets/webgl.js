@@ -32,29 +32,39 @@ class MyWebGL {
 		this.loadingUI = loadingUI;
 		this.sources = {
 			texture: {},
-			audio: {
-				env: {},
-				note: {}
-			}
+			note: []
 		};
 		this.mouse = new THREE.Vector2();
+		this.centerBox = new THREE.Object3D();
+		this.nearBox = new THREE.Object3D();
+		this.noteControl = {
+			count: 0,
+			timer: 50 + Math.random() * 500
+		};
+		this.iosAudioBox = [];
+
 		this.init();
 		this.resize();
 		this.animate();
 		this.initManager();
 		this.loadTexture();
-		// this.loadAudio();
+		this.loadAudio();
 		this.mouseControls();
+
+		this.isIOS( this.iosAudioPlay() );
 	}
 
 	init() {
 		const scene = new THREE.Scene();
 		scene.fog = new THREE.FogExp2( 0x000000, 0.008 );
+		this.centerBox.position.set(0, 0, 50);
+		this.nearBox.position.set(0, 0, 150);
+		scene.add(this.centerBox, this.nearBox);
 
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 		camera.position.set(0, 0, 100);
 		
-		const light = new THREE.PointLight( 0xffffff, 1, 100 );
+		const light = new THREE.PointLight( 0xffffff, 1, 0 );
 		light.position.set(0, 0, 60);
 		scene.add(light);
 
@@ -72,7 +82,7 @@ class MyWebGL {
 		renderer.setPixelRatio(window.devicePixelRatio);
 		this.scene = scene;
 		this.camera = camera;
-		// this.light = light;
+		this.light = light;
 		this.container = container;
 		this.renderer = renderer;	
 	}
@@ -80,14 +90,12 @@ class MyWebGL {
 	initManager() {
 		const manager = new THREE.LoadingManager();
 		manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-			console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
 			this.loadingUI.update({
 				id: 'all',
 				process: [itemsLoaded, itemsTotal]
 			});
 		};
 		manager.onLoad = () => {
-			// console.log(this.sources);
 			this.createPlants();
 			this.createParticles(60);
 			this.createLogo();
@@ -104,26 +112,32 @@ class MyWebGL {
 
 	loadAudio() {
 		const listener = new THREE.AudioListener();
-		this.camera.add( listener );
+		this.camera.add(listener);
 		this.listener = listener;
 		const audioLoader = new THREE.AudioLoader(this.manager);
 		for (const audio of Object.keys(AUDIO_GROUP.env)) {
 			audioLoader.load(AUDIO_GROUP.env[audio], buffer => {
 				const sound = new THREE.PositionalAudio(listener);
 				sound.setBuffer(buffer);
-				sound.setRefDistance(20);
-				// sound.play();
-				this.sources.audio.env[audio] = sound;
+				sound.setLoop(true);
+				sound.setVolume(0.5);
+				sound.setRefDistance(10);
+				sound.play();
+				if (audio === 'audio_env1') {
+					this.nearBox.add(sound);
+				} else{
+					this.centerBox.add(sound);
+				}
+				this.iosAudioBox.push(sound);
 			});
 		}
 		for (const audio of Object.keys(AUDIO_GROUP.note)) {
 			audioLoader.load(AUDIO_GROUP.note[audio], buffer => {
 				const sound = new THREE.Audio(listener);
 				sound.setBuffer( buffer );
-				sound.setLoop(true);
 				sound.setVolume(0.5);
-				// sound.play();
-				this.sources.audio.note[audio] = sound;
+				this.sources.note.push(sound);
+				this.iosAudioBox.push(sound);
 			});
 		}
 	}
@@ -136,8 +150,7 @@ class MyWebGL {
 			map: this.sources.texture.image_logo
 		});
 		const logo = new THREE.Mesh(geo, mtl);
-		logo.position.set(0, 0, 50);
-		this.scene.add(logo);
+		this.centerBox.add(logo);
 		this.logo = logo;
 	}
 
@@ -202,8 +215,22 @@ class MyWebGL {
 		this.logoAnimation();
 		this.plantsAnimation();
 		this.particlesAnimation();
+		this.noteAutoPlay();
 		this.updateCamera();
 		this.render();
+	}
+
+	noteAutoPlay() {
+		this.noteControl.count ++;
+		if (this.noteControl.count > this.noteControl.timer) {
+			this.noteControl.count = 0;
+			this.noteControl.timer = 50 + Math.random() * 500;
+			const note = this.sources.note[Math.floor(this.sources.note.length * Math.random())];
+			if (note) {
+				note.isPlaying && note.stop();
+				note.play();
+			}
+		}
 	}
 
 	logoAnimation() {
@@ -239,12 +266,11 @@ class MyWebGL {
 		let y = event.clientX ? event.clientY : (event.changedTouches ? event.changedTouches[0].clientY : center.y);
 		this.mouse.x = -1 + (x / window.innerWidth) * 2;
 		this.mouse.y = 1 - (y / window.innerHeight) * 2;
-		// raycaster.setFromCamera(this.mouse, camera);
 	}
 
 	updateCamera() {
 		this.camera.position.x += ( this.normalize(this.mouse.x, -1, 1, -60, 60) - this.camera.position.x ) * 0.1;
-		this.camera.position.z += ( this.normalize(-this.mouse.y, -1, 1, 30, 150) - this.camera.position.z ) * 0.1;
+		this.camera.position.z += ( this.normalize(-this.mouse.y, -1, 1, 30, 220) - this.camera.position.z ) * 0.1;
 		this.camera.lookAt(new THREE.Vector3(0, 0, -10000));
 	}
 
@@ -305,6 +331,23 @@ class MyWebGL {
 			}
 			child = child.parent;
 		}
+	}
+
+	isIOS(callback) {
+		const ua = navigator.userAgent.toLowerCase();
+		if (/iphone|ipad/.test(ua)) {
+			callback && callback();
+		}
+	}
+
+	iosAudioPlay() {
+		const play = () => {
+			for (const audio of this.iosAudioBox) {
+				audio && audio.play();
+			}
+			document.body.removeEventListener('touchstart', play, false);
+		};
+		document.body.addEventListener('touchstart', play, false);
 	}
 }
 
