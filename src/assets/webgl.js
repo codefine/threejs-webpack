@@ -1,6 +1,5 @@
 // 资源
-import image_part1 from './image/part1.png'; /* eslint-disable-line */
-import image_part2 from './image/part2.png'; /* eslint-disable-line */
+import image_plant from './image/plant.png'; /* eslint-disable-line */
 import image_particle from './image/particle.png'; /* eslint-disable-line */
 import image_logo from './image/logo.png'; /* eslint-disable-line */
 import audio_env1 from './audio/env_loop/env_1_loop.mp3'; /* eslint-disable-line */
@@ -18,7 +17,7 @@ import audio_note9 from './audio/note/note09.mp3'; /* eslint-disable-line */
 import audio_note10 from './audio/note/note10.mp3'; /* eslint-disable-line */
 import audio_note11 from './audio/note/note11.mp3'; /* eslint-disable-line */
 import audio_note12 from './audio/note/note12.mp3'; /* eslint-disable-line */
-const IMAGE_GROUP = { image_part1, image_part2, image_particle, image_logo };
+const IMAGE_GROUP = { image_plant, image_particle, image_logo };
 const AUDIO_GROUP = {
 	env: { audio_env1, audio_env2, audio_env3 },
 	note: { audio_note1, audio_note2, audio_note3, audio_note4, audio_note5, audio_note6, audio_note7, audio_note8, audio_note9, audio_note10, audio_note11, audio_note12 }
@@ -161,7 +160,7 @@ class MyWebGL {
 		const geo = new THREE.PlaneGeometry(100, 100);
 		const mtl = new THREE.MeshPhongMaterial({
 			transparent: true,
-			map: this.sources.texture.image_part1
+			map: this.sources.texture.image_plant
 		});
 		
 		_plant.call(this, geo, mtl, 50, 30, -30);
